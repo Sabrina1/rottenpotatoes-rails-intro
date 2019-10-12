@@ -11,7 +11,13 @@ class MoviesController < ApplicationController
   end
 
   def index
-    @movies = Movie.all
+    sort_by = params[:sort_by]
+    @movies = Movie.order(sort_by).all
+    if sort_by == 'title'
+      @title_header = 'bg-warning hilite'
+    elsif sort_by == 'release_date'
+      @release_date_header = 'bg-warning hilite'
+    end
   end
 
   def new
