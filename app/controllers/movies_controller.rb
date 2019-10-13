@@ -23,6 +23,7 @@ class MoviesController < ApplicationController
       @selected_ratings = session[:selected_ratings]
     else
       @selected_ratings = params[:ratings].keys
+      params[:selected_ratings] = @selected_ratings
     end
 
     if params[:sort_by] == nil
