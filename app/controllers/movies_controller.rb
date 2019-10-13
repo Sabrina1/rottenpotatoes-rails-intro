@@ -13,41 +13,36 @@ class MoviesController < ApplicationController
   def index
     # @all_ratings = Movie.uniq.pluck(:rating).sort_by!{ |e| e.downcase }
     @all_ratings = Movie.possible_ratings #get the possible ratings from Movie model
-
-    if params[:selected_ratings] != nil
+    # @selected_ratings and params[:selected_ratings] represent array of selected ratings
+    # params[:ratings] is a dict of the selected ratings with value set to 1
+    if params[:selected_ratings] != nil #if ratings are selected
       @selected_ratings = params[:selected_ratings]
-    elsif session[:selected_ratings] == nil and params[:ratings] == nil
-      @selected_ratings = @all_ratings
-    elsif params[:ratings] == nil
+    elsif session[:selected_ratings] == nil and params[:ratings] == nil #if no ratings selected
+      @selected_ratings = @all_ratings #select all ratings by default
+    elsif params[:ratings] == nil #if just param ratings is nil but session selected ratings exists
       @selected_ratings = session[:selected_ratings]
     else
       @selected_ratings = params[:ratings].keys
     end
 
-    # sort_by = params[:sort_by]
     if params[:sort_by] == nil
       sort_by = session[:sort_by]
     else
       sort_by = params[:sort_by]
     end
 
-    if session[:sort_by] !=  params[:sort_by] or session[:selected_ratings] == nil or session[:selected_ratings]!=  params[:selected_ratings]
-       session[:sort_by] =  sort_by
+    if session[:selected_ratings] != params[:selected_ratings] or session[:sort_by] != params[:sort_by]
        session[:selected_ratings] =  @selected_ratings
+       session[:sort_by] = sort_by
        flash.keep
        redirect_to selected_ratings: @selected_ratings, sort_by: sort_by
     end
 
-    # if session[:selected_ratings] == nil or session[:selected_ratings]!=  params[:selected_ratings]
-    #    session[:selected_ratings] =  @selected_ratings
-    #    flash.keep
-    #    redirect_to '/new', selected_ratings: @selected_ratings, sort_by: sort_by
-    # end
     @movies = Movie.with_ratings(@selected_ratings).order(sort_by)
     if sort_by == 'title'
-      @title_header = 'bg-warning hilite'
+      @title_header_style = 'bg-warning hilite'
     elsif sort_by == 'release_date'
-      @release_date_header = 'bg-warning hilite'
+      @release_date_header_style = 'bg-warning hilite'
     end
   end
 
