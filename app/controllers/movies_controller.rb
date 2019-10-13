@@ -11,21 +11,38 @@ class MoviesController < ApplicationController
   end
 
   def index
-    # @all_ratings = Movie.uniq.pluck(:rating).sort_by!{ |e| e.downcase } #get the possible ratings from Movie model
+    # @all_ratings = Movie.uniq.pluck(:rating).sort_by!{ |e| e.downcase }
     @all_ratings = Movie.possible_ratings #get the possible ratings from Movie model
-    #how to figure out which boxes the user checked and
-    #how to restrict the database query based on that result.
 
     if params[:selected_ratings] != nil
       @selected_ratings = params[:selected_ratings]
-    elsif params[:ratings] == nil
+    elsif session[:selected_ratings] == nil and params[:ratings] == nil
       @selected_ratings = @all_ratings
+    elsif params[:ratings] == nil
+      @selected_ratings = session[:selected_ratings]
     else
       @selected_ratings = params[:ratings].keys
     end
-    puts @selected_ratings
-    sort_by = params[:sort_by]
 
+    # sort_by = params[:sort_by]
+    if params[:sort_by] == nil
+      sort_by = session[:sort_by]
+    else
+      sort_by = params[:sort_by]
+    end
+
+    if session[:sort_by] !=  params[:sort_by] or session[:selected_ratings] == nil or session[:selected_ratings]!=  params[:selected_ratings]
+       session[:sort_by] =  sort_by
+       session[:selected_ratings] =  @selected_ratings
+       flash.keep
+       redirect_to selected_ratings: @selected_ratings, sort_by: sort_by
+    end
+
+    # if session[:selected_ratings] == nil or session[:selected_ratings]!=  params[:selected_ratings]
+    #    session[:selected_ratings] =  @selected_ratings
+    #    flash.keep
+    #    redirect_to '/new', selected_ratings: @selected_ratings, sort_by: sort_by
+    # end
     @movies = Movie.with_ratings(@selected_ratings).order(sort_by)
     if sort_by == 'title'
       @title_header = 'bg-warning hilite'
