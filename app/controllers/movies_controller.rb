@@ -11,8 +11,22 @@ class MoviesController < ApplicationController
   end
 
   def index
+    # @all_ratings = Movie.uniq.pluck(:rating).sort_by!{ |e| e.downcase } #get the possible ratings from Movie model
+    @all_ratings = Movie.possible_ratings #get the possible ratings from Movie model
+    #how to figure out which boxes the user checked and
+    #how to restrict the database query based on that result.
+
+    if params[:selected_ratings] != nil
+      @selected_ratings = params[:selected_ratings]
+    elsif params[:ratings] == nil
+      @selected_ratings = @all_ratings
+    else
+      @selected_ratings = params[:ratings].keys
+    end
+    puts @selected_ratings
     sort_by = params[:sort_by]
-    @movies = Movie.order(sort_by).all
+
+    @movies = Movie.with_ratings(@selected_ratings).order(sort_by)
     if sort_by == 'title'
       @title_header = 'bg-warning hilite'
     elsif sort_by == 'release_date'
